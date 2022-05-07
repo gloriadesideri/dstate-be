@@ -67,11 +67,12 @@ exports.login = async (req, res, next) => {
             // Step 4: Create JWT
             ////////////////////////////////////////////////////
             .then((user) => {
+                console.log(user.id)
                 let accessToken=jwt.sign(
                     {
-                        id: user._id, publicAddress,
+                        id: user.id, publicAddress,
                     },
-                    "B4CDD8977BD7984DDACA26B235965",
+                    "E1J6vwm0KkRvOkbeMlex-5hN36OwP_UTv5dZZVpyoN8",
                 )
                 return accessToken;
             })

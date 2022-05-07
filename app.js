@@ -1,14 +1,12 @@
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
-var logger = require('morgan');
 const session = require('express-session');
 const passport = require('passport');
-const { MongoClient, ServerApiVersion } = require('mongodb');
-const expressValidator = require('express-validator');
 const cors = require('cors')
 const mongoose = require('mongoose');
 require("./handlers/passport")
+const expFileUpload = require("express-fileupload");
 
 
 
@@ -16,7 +14,7 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var authRouter = require('./routes/auth');
 var contractRouter = require('./routes/contracts')
-
+var buildingRouter = require('./routes/buildings')
 var app = express();
 
 app.use(session( { secret:"62C158BD4EFF834E4D98ACD68DDBA"} ));
@@ -42,10 +40,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(expFileUpload());
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/auth', authRouter);
 app.use('/contract',contractRouter);
-
+app.use('/building', buildingRouter)
 module.exports = app;
