@@ -9,8 +9,7 @@ const {ObjectID} = require("mongodb");
 
 const options={
     jwtFromRequest:ExtractJWT.fromAuthHeaderAsBearerToken(),
-    secretOrKey:"62C158BD4EFF834E4D98ACD68DDBA",
-    algorithms:['RS256']
+    secretOrKey:"E1J6vwm0KkRvOkbeMlex-5hN36OwP_UTv5dZZVpyoN8",
 }
 const strategy=new JWTStrategy(options, async (payload,done)=>{
     await User.findOne({_id:payload.id}).then((user)=>{
