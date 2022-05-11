@@ -8,6 +8,7 @@ const ipfsClient = require ('ipfs-http-client')
 const ipfs= ipfsClient.create('https://ipfs.infura.io:5001/api/v0')
 
 exports.create = async (req, res, next) => {
+    console.log(req.body)
     const web3 = new Web3("http://localhost:8545")
     const pathToFile=path.join(__dirname,'../solidity/build/contracts','NewToken.json')
 
@@ -16,7 +17,7 @@ exports.create = async (req, res, next) => {
     var myContract = new web3.eth.Contract(data.abi);
     await myContract.deploy({
         data: data.bytecode,
-        arguments: [req.body.amount, req.body.name, req.body.symbol]
+        arguments: [req.body.initial_amount, req.body.name, req.body.symbol]
     }).send({
         from: req.user.publicAddress,
         gas: 1500000,
