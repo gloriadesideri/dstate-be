@@ -15,6 +15,8 @@ var usersRouter = require('./routes/users');
 var authRouter = require('./routes/auth');
 var contractRouter = require('./routes/contracts')
 var buildingRouter = require('./routes/buildings')
+var tokenRouter = require('./routes/tokens')
+
 var app = express();
 
 app.use(session( { secret:"62C158BD4EFF834E4D98ACD68DDBA"} ));
@@ -46,5 +48,6 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/auth', authRouter);
 app.use('/contract',contractRouter);
-app.use('/building', buildingRouter)
+app.use('/building', buildingRouter);
+app.use('/token', tokenRouter);
 module.exports = app;
