@@ -42,6 +42,7 @@ exports.login = async (req, res, next) => {
                     data: msgBufferHex,
                     sig: signature,
                 });
+                console.log(address)
 
                 // The signature verification is successful if the address found with
                 // sigUtil.recoverPersonalSignature matches the initial publicAddress
@@ -49,6 +50,7 @@ exports.login = async (req, res, next) => {
                     return user;
                 } else {
                     res.status(401).send({
+                        
                         error: 'Signature verification failed',
                     });
 
