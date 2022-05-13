@@ -30,7 +30,7 @@ exports.create = async (req, res, next) => {
 
 
     var data = JSON.parse(fs.readFileSync(pathToFile));
-
+    console.log(data.bytecode)
     var myContract = new web3.eth.Contract(data.abi);
     await myContract.deploy({
         data: data.bytecode,
