@@ -28,6 +28,31 @@ exports.getEncodedABI = async (req, res, next) => {
 }
 exports.create = async (req,res,next)=>{
     console.log(req.body)
+    let tx = await web3.eth.getTransaction(req.body.transactionHash)
+    while(tx.blockNumber == null){
+        tx = await web3.eth.getTransaction(req.body.transactionHash)
+    }
+    let receipt = await web3.eth.getTransactionReceipt(req.body.transactionHash)
+    
+    console.log(receipt.contractAddress)
+    
+    let token = await Token.create({
+        name: req.body.name,
+        symbol: req.body.symbol,
+        initial_amount: req.body.initial_amount,
+        address:receipt.contractAddress,
+        user_id: req.user._id
+    })
+    let building = await Building.create({
+        name: req.body.building_name,
+        address:req.body.building_address,
+        token_id: token.id,
+        user_id: req.user.id
+
+
+    })
+    return res.send({building: building, token: token})
+
 }
 exports.uploadDocument = async (req, res) =>{
     console.log( req.files);
