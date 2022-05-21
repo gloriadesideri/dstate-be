@@ -23,6 +23,10 @@ const buildingSchema = new mongoose.Schema({
     token_id: {
         type:mongoose.Schema.ObjectId,
         ref:'Token'
+    },
+    approved:{
+        type: Boolean,
+        default: false
     }
 
 

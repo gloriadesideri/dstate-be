@@ -22,20 +22,41 @@ exports.getEncodedABI = async (req, res, next) => {
         data: data.bytecode,
         arguments: [req.body.initial_amount, req.body.name, req.body.symbol]
     }).encodeABI()
-    console.log(encodedABI)
     res.send({abi:encodedABI})
 
 }
-exports.create = async (req,res,next)=>{
+exports.createSetPriceTransaction = async (req,res, next)=>{
+    const pathToFile=path.join(__dirname,'../solidity/build/contracts','BuySell.json')
+    var data = JSON.parse(fs.readFileSync(pathToFile));
+    var myContract = new web3.eth.Contract(data.abi, process.env.BUY_SEELL_ADDRESS);
+    let encodedABI=await myContract.methods.setPrice(req.body.amountOfETH*Math.pow(10, 18),req.body.tokenAmount*Math.pow(10, 18),req.body.tokenAddress).encodeABI()
+    res.send({abi:encodedABI})
+}
+exports.getPriceForTokens= async (req,res,next)=>{
+    const pathToFile=path.join(__dirname,'../solidity/build/contracts','BuySell.json')
+    var data = JSON.parse(fs.readFileSync(pathToFile));
+    var myContract = new web3.eth.Contract(data.abi, process.env.BUY_SEELL_ADDRESS);
+    const res_from_get_price = await myContract.methods.getPriceForTokens(req.body.tokenAmount*Math.pow(10, 18),req.body.tokenAddress).call({from: req.user.publicAddress})
+    console.log(res_from_get_price);
+    res.send({price: res_from_get_price})
+}
+exports.createBuyTokenTransaction = async (req,res,next)=>{
+    const pathToFile=path.join(__dirname,'../solidity/build/contracts','BuySell.json')
+    var data = JSON.parse(fs.readFileSync(pathToFile));
+    var myContract = new web3.eth.Contract(data.abi, process.env.BUY_SEELL_ADDRESS);
+    var encodedABI= await myContract.methods.buyTokens(req.body.tokenAddress, req.body.promisedPrice*Math.pow(10, 18),req.body.tokenAmount*Math.pow(10, 18) ).encodeABI();
+    res.send({abi:encodedABI})
+}
+exports.createToken = async (req,res,next)=>{
     console.log(req.body)
     let tx = await web3.eth.getTransaction(req.body.transactionHash)
     while(tx.blockNumber == null){
         tx = await web3.eth.getTransaction(req.body.transactionHash)
     }
     let receipt = await web3.eth.getTransactionReceipt(req.body.transactionHash)
-    
+
     console.log(receipt.contractAddress)
-    
+
     let token = await Token.create({
         name: req.body.name,
         symbol: req.body.symbol,
@@ -43,16 +64,20 @@ exports.create = async (req,res,next)=>{
         address:receipt.contractAddress,
         user_id: req.user._id
     })
+    let building = await Building.findOneAndUpdate(
+        { "_id" : req.body.building_id },
+        { "token_id" : token._id  }
+    )
+    return res.send({building: building, token: token})
+
+}
+exports.create= async (req, res)=>{
     let building = await Building.create({
         name: req.body.building_name,
         address:req.body.building_address,
-        token_id: token.id,
         user_id: req.user.id
-
-
     })
-    return res.send({building: building, token: token})
-
+    return res.send({building: building});
 }
 exports.uploadDocument = async (req, res) =>{
     console.log( req.files);
@@ -67,3 +92,29 @@ exports.uploadDocument = async (req, res) =>{
         return res.send(filesAdded)
     }
 }
+exports.fetchUnapproved = async (req, res)=>{
+    const buildings = await Building.find({"approved": false});
+    res.send(200, {buildings})
+}
+exports.fetchApproved = async (req, res)=>{
+    const buildings = await Building.find({"approved": true});
+    res.send(200, {buildings})
+}
+exports.approveBuilding = async (req, res)=>{
+    const building = await Building.findOne({id:req.body.building_id});
+    building.approved= true;
+    await building.save();
+    res.send(200, "building approved")
+}
+
+exports.fetchBuildings = async (req,res)=>{
+    let buildings;
+    if(req.params.building_id){
+        let building = await Building.findOne({id:req.params.building_id});
+        buildings.push(building)
+    }else{
+        buildings = await Building.find({user_id:req.user._id});
+    }
+    res.send(200, {buildings})
+}
+

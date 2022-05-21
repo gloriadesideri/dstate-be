@@ -13,7 +13,6 @@ const expFileUpload = require("express-fileupload");
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var authRouter = require('./routes/auth');
-var contractRouter = require('./routes/contracts')
 var buildingRouter = require('./routes/buildings')
 var tokenRouter = require('./routes/tokens')
 
@@ -47,7 +46,6 @@ app.use(expFileUpload());
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/auth', authRouter);
-app.use('/contract',contractRouter);
 app.use('/building', buildingRouter);
 app.use('/token', tokenRouter);
 module.exports = app;

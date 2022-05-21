@@ -1,3 +1,4 @@
+//SPDX-License-Identifier: Unlicensed for now
 pragma solidity ^0.8.4;
 
 import "./NewToken.sol";
@@ -5,130 +6,300 @@ import "./NewToken.sol";
 // Learn more about the ERC20 implementation
 // on OpenZeppelin docs: https://docs.openzeppelin.com/contracts/4.x/api/access#Ownable
 import "@openzeppelin/contracts/access/Ownable.sol";
-
 contract BuySell is Ownable {
 
     struct sellingInstance {
-        address seller;
+        address payable seller;
         address tokenAddress;
         uint256 amountOfETH;
+        uint256 id;
         uint amountToSell;
+
+    }
+
+    struct variables{
+        int firstCheapestIndex;
+        int nextCheapestIndex;
+        bool sent;
+        uint price;
+        int remainingToBuy;
+
     }
 
     sellingInstance [] sellingInstances;
+    uint256 idCount=0;
 
-    // Our Token Contract
-    NewToken newToken;
 
-    // token price for ETH
-    uint256 public tokensPerEth = 100;
 
     // Event that log buy operation
-    event BuyTokens(address buyer, uint256 amountOfETH, uint256 amountOfTokens, uint amountToSell);
+    event BuyTokens(address buyer, uint256 amountOfETH, uint256 amountOfTokens);
 
-    constructor(address tokenAddress) {
-        newToken = YourToken(tokenAddress);
-    }
 
-    function setPrice(uint256 amountOfETH, address tokenAddress) public returns (sellingInstance instance){
-        //look for a selling instance in the array
-        for (uint j = 0; j < sellingInstances.length; j++) {
-            if (sellingInstances[i].tokenAddress == tokenAddress && sellingInstances[i] == msg.sender) {
-                sellingInstances[i].amountOfETH == amountOfETH;
-                return sellingInstances[i];
-            }
-        }
-        //if there is not create a new one
-        s = sellingInstance(msg.sender, tokenAddress, amountOfETH);
+    function setPrice(uint256 amountOfETH, uint256 tokenAmount, address tokenAddress) public returns (sellingInstance memory instance){
+        ERC20 newToken = ERC20(tokenAddress);
+        newToken.transferFrom(msg.sender,address (this),tokenAmount);
+        sellingInstance memory s = sellingInstance(payable(msg.sender), tokenAddress, amountOfETH, idCount,tokenAmount);
         sellingInstances.push(s);
+        idCount= idCount+1;
         return s;
 
     }
-    function injectionSort(sellingInstance[] arr) private returns(sellingInstances[] array) {
-        sellingInstances memory array= arr;
-        sellingInstance key;
-        uint j;
-        for (uint i =0; i<array.length; i++){
-            key = array[i];
+    function injectionSort(sellingInstance[] memory arr) private pure returns(sellingInstance[] memory array) {
+        //sellingInstance[] memory array= arr;
+        sellingInstance memory key;
+        int j;
+        for (int i =0; i<int(arr.length); i++){
+            key = arr[uint(i)];
             j = i - 1;
 
             // Move elements of arr[0..i-1],
             // that are greater than key, to one
             // position ahead of their
             // current position
-            while (j >= 0 && array[j].amountOfETH > key.amountOfETH)
+            while (j >= 0 && arr[uint(j)].amountOfETH > key.amountOfETH)
             {
-                array[j + 1] = array[j];
+                arr[uint(j + 1)] = arr[uint(j)];
                 j = j - 1;
             }
-            array[j + 1] = key;
+            arr[uint(j + 1)] = key;
         }
-        return array;
+        return arr;
     }
 
-    function nextCheapest(address tokenAddress, sellingInstance previousCheapest) private returns (sellingInstance instance){
+    function getNextCheapest(address tokenAddress, sellingInstance memory previousCheapest, sellingInstance[] memory sortedArray) private pure returns (int instanceIndex){
+
+
+        for (uint j = 0; j < sortedArray.length; j++) {
+            if (sortedArray[j].tokenAddress == tokenAddress && sortedArray[j].amountOfETH> previousCheapest.amountOfETH) {
+                return int(sortedArray[j].id); //changed from returning j
+            }
+        }
+        return -1;
+
+    }
+    function getFirstCheapest(address tokenAddress, sellingInstance[] memory sortedArray) private pure returns(int instanceIndex){
+        for (uint j = 0; j < sortedArray.length; j++) {
+            if (sortedArray[j].tokenAddress == tokenAddress) {
+                return int(sortedArray[j].id); //changed from returning j
+            }
+        }
+        return -1;
+    }
+
+    function getNextCheapestForSeller(address tokenAddress, sellingInstance memory previousCheapest, sellingInstance[] memory sortedArray, address sellerAddress) private pure returns (int instanceIndex){
+
+
+        for (uint j = 0; j < sortedArray.length; j++) {
+            if (sortedArray[j].tokenAddress == tokenAddress && sortedArray[j].amountOfETH> previousCheapest.amountOfETH && sortedArray[j].seller == sellerAddress) {
+                return int(sortedArray[j].id); //changed from returning j
+            }
+        }
+        return -1;
+
+    }
+    function getFirstCheapestForSeller(address tokenAddress, sellingInstance[] memory sortedArray, address sellerAddress) private pure returns(int instanceIndex){
+        for (uint j = 0; j < sortedArray.length; j++) {
+            if (sortedArray[j].tokenAddress == tokenAddress && sortedArray[j].seller == sellerAddress) {
+                return int(sortedArray[j].id); //changed from returning j
+            }
+        }
+        return -1;
+    }
+
+    function getPriceForTokens(address tokenAddress, uint amount) public view returns(uint pri){
         sellingInstance[] memory sortedArray = injectionSort(sellingInstances);
+        int firstCheapestIndex = getFirstCheapest(tokenAddress, sortedArray);
 
-        for (uint j = 0; j < sortedArray.length; j++) {
-            if (sortedArray[i].tokenAddress == tokenAddress && sortedArray[i].amountOfETH>previousCheapest.amountOfETH) {
-                return sellingInstances[i];
+        int nextCheapestIndex;
+        sellingInstance memory nextCheapest;
+
+
+        uint remainingToBuy =amount;
+        uint price;
+
+        if(firstCheapestIndex == -1){
+            return 0;
+        }
+        sellingInstance memory firstCheapest= sellingInstances[uint256(firstCheapestIndex)];
+
+        if(firstCheapest.amountToSell>=amount){
+            price= (amount * firstCheapest.amountOfETH) / (10 ** 18);
+            return price;
+        }else{
+            price= (firstCheapest.amountToSell * firstCheapest.amountOfETH) / (10 ** 18);
+            remainingToBuy= remainingToBuy - firstCheapest.amountToSell;
+            nextCheapestIndex = getNextCheapest(tokenAddress,firstCheapest, sortedArray);
+            //emit event not enough tokens or return struct instead
+        }
+
+        while(remainingToBuy >0 && nextCheapestIndex!=-1){
+            nextCheapest=sellingInstances[uint256(nextCheapestIndex)];
+            if(nextCheapest.amountToSell>=remainingToBuy){
+                price= price + ((remainingToBuy * nextCheapest.amountOfETH) / (10 ** 18));
+                return price;
+            }else{
+                price= price + ((nextCheapest.amountToSell * nextCheapest.amountOfETH) / (10 ** 18));
+                remainingToBuy= remainingToBuy - firstCheapest.amountToSell;
+                nextCheapestIndex = getNextCheapest(tokenAddress,nextCheapest, sortedArray);
             }
         }
-        return null;
-
+        return price;
     }
-    function firstCheapest(address tokenAddress) private returns(sellingInstance instance){
-        for (uint j = 0; j < sortedArray.length; j++) {
-            if (sortedArray[i].tokenAddress == tokenAddress) {
-                return sellingInstances[i];
+
+    function find(uint id) private view returns(int realIndex){
+        for (int i =0; i<int(sellingInstances.length); i++){
+            if(sellingInstances[uint(i)].id==id){
+                return i;
             }
         }
-        return null;
-    }
-
-    function getPriceForTokens(address tokenAddress, uint amount) public view returns(uint price){
-        sellingInstance firstCheapest = firstCheapest(tokenAddress);
-        if(firstCheapest == null){
-
-        }
-
-        uint count = amount;
-        uint price =;
-        while (count>0){
-
-        }
-
+        return -1;
     }
 
     /**
     * @notice Allow users to buy token for ETH
   */
-    function buyTokens(address tokenAddress) public payable returns (uint256 tokenAmount) {
-        sellingInstance firstCheapest = firstCheapest(tokenAddress);
-        if(firstCheapest == null){
 
-        }
+    function buyTokens(address tokenAddress, uint promisedPrice, uint amount) public payable {
+        uint actualPrice = getPriceForTokens(tokenAddress,amount);
 
-        require(msg.value > firstCheapest.amountOfETH, "Send ETH to buy some tokens");
 
-        uint256 amountToBuy = msg.value / tokensPerEth;
+        //return actualPrice;
+        require(msg.value >= actualPrice, "Send ETH to buy some tokens");
+
+        ERC20 newToken = ERC20(tokenAddress);
+
 
         // check if the Vendor Contract has enough amount of tokens for the transaction
         uint256 vendorBalance = newToken.balanceOf(address(this));
-        require(vendorBalance >= amountToBuy, "Vendor contract has not enough tokens in its balance");
+        require(vendorBalance >= amount, "Vendor contract has not enough tokens in its balance");
+        require(actualPrice == promisedPrice, "Price mismatch");
 
         // Transfer token to the msg.sender
-        (bool sent) = newToken.transfer(msg.sender, amountToBuy);
-        require(sent, "Failed to transfer token to user");
+
+
+        sellingInstance [] memory sortedArray = injectionSort(sellingInstances);
+
+        //int firstCheapestIndex = int(getFirstCheapest(tokenAddress, sortedArray));
+
+        //int nextCheapestIndex;
+        sellingInstance memory nextCheapest;
+
+        //uint remainingToBuy =amount;
+        //uint price=0;
+
+        variables memory vars = variables(int(getFirstCheapest(tokenAddress, sortedArray)), -1, false, 0, int(amount));
+        (vars.sent) = newToken.transfer(msg.sender, amount);
+        require(vars.firstCheapestIndex != -1, "No tokens available");
+
+        sellingInstance memory firstCheapest= sortedArray[uint(vars.firstCheapestIndex)];
+        int firstCheapestRealIndex = find(firstCheapest.id);
+
+        if(firstCheapest.amountToSell>=amount){
+            sellingInstances[uint(firstCheapestRealIndex)].amountToSell = sellingInstances[uint(firstCheapestRealIndex)].amountToSell -amount;
+            sellingInstances[uint(firstCheapestRealIndex)].seller.transfer((amount * firstCheapest.amountOfETH) / (10 ** 18));
+            vars.remainingToBuy = 0;
+        }else{
+            vars.price= (firstCheapest.amountToSell * firstCheapest.amountOfETH) / (10 ** 18);
+            sellingInstances[uint(firstCheapestRealIndex)].seller.transfer(vars.price);
+
+            vars.remainingToBuy = vars.remainingToBuy- int(sellingInstances[uint(firstCheapestRealIndex)].amountToSell);
+            sellingInstances[uint(firstCheapestRealIndex)].amountToSell=0;
+            vars.nextCheapestIndex = getNextCheapest(tokenAddress,firstCheapest, sortedArray);
+
+        }
+        while(vars.remainingToBuy >0 && vars.nextCheapestIndex!=-1){
+            nextCheapest=sellingInstances[uint(vars.nextCheapestIndex)];
+            int nextCheapestRealIndex = find(nextCheapest.id);
+            if(int(nextCheapest.amountToSell)>=vars.remainingToBuy){
+
+                sellingInstances[uint(nextCheapestRealIndex)].amountToSell = sellingInstances[uint(nextCheapestRealIndex)].amountToSell -uint(vars.remainingToBuy);
+                sellingInstances[uint(nextCheapestRealIndex)].seller.transfer((uint(vars.remainingToBuy) * nextCheapest.amountOfETH) / (10 ** 18));
+                vars.remainingToBuy = 0;
+
+
+            }else{
+                vars.price= (nextCheapest.amountToSell * nextCheapest.amountOfETH) / (10 ** 18);
+                sellingInstances[uint(nextCheapestRealIndex)].seller.transfer(vars.price);
+                vars.remainingToBuy = vars.remainingToBuy- int(sellingInstances[uint(nextCheapestRealIndex)].amountToSell);
+
+                sellingInstances[uint(nextCheapestRealIndex)].amountToSell=0;
+                vars.nextCheapestIndex = getNextCheapest(tokenAddress, nextCheapest, sortedArray);
+            }
+        }
+
+        require(vars.sent, "Failed to transfer token to user");
 
         // emit the event
-        emit BuyTokens(msg.sender, msg.value, amountToBuy);
+        emit BuyTokens(msg.sender, msg.value, amount);
 
-        return amountToBuy;
+
     }
+
+
     /**
-    * @notice Allow the owner of the contract to withdraw ETH
+    * @notice Allow seller to cancel sale of tokens
   */
+    function cancelSale(address tokenAddress, uint amount) public {
+        ERC20 newToken = ERC20(tokenAddress);
+
+
+        // check if the Vendor Contract has enough amount of tokens for the transaction
+        uint256 vendorBalance = newToken.balanceOf(address(this));
+        require(vendorBalance >= amount, "Vendor contract has not enough tokens in its balance");
+
+
+        // Transfer token to the msg.sender
+
+
+        sellingInstance [] memory sortedArray = injectionSort(sellingInstances);
+
+
+        sellingInstance memory nextCheapest;
+
+
+
+        variables memory vars = variables(int(getFirstCheapestForSeller(tokenAddress, sortedArray, msg.sender)), -1, false, 0, int(amount));
+        //(vars.sent) = newToken.transfer(msg.sender, amount);
+        require(vars.firstCheapestIndex != -1, "No tokens available");
+        uint amountToCancel = 0;
+
+        sellingInstance memory firstCheapest= sortedArray[uint(vars.firstCheapestIndex)];
+        int firstCheapestRealIndex = find(firstCheapest.id);
+
+        if(firstCheapest.amountToSell>=amount){
+            sellingInstances[uint(firstCheapestRealIndex)].amountToSell = sellingInstances[uint(firstCheapestRealIndex)].amountToSell -amount;
+            amountToCancel = amountToCancel + amount;
+            vars.remainingToBuy = 0;
+        }else{
+            //vars.price= (amount * firstCheapest.amountOfETH) / (10 ** 18);
+            //sellingInstances[uint(firstCheapestRealIndex)].seller.transfer(vars.price);
+            vars.remainingToBuy = vars.remainingToBuy- int(sellingInstances[uint(firstCheapestRealIndex)].amountToSell);
+            amountToCancel = amountToCancel + sellingInstances[uint(firstCheapestRealIndex)].amountToSell;
+            sellingInstances[uint(firstCheapestRealIndex)].amountToSell=0;
+            vars.nextCheapestIndex = getNextCheapestForSeller(tokenAddress,firstCheapest, sortedArray, msg.sender);
+        }
+        while(vars.remainingToBuy > 0 && vars.nextCheapestIndex!=-1){
+            nextCheapest=sellingInstances[uint(vars.nextCheapestIndex)];
+            int nextCheapestRealIndex = find(nextCheapest.id);
+            if(nextCheapest.amountToSell>=uint(vars.remainingToBuy)){
+                sellingInstances[uint(nextCheapestRealIndex)].amountToSell = sellingInstances[uint(nextCheapestRealIndex)].amountToSell -uint(vars.remainingToBuy);
+                //sellingInstances[uint(nextCheapestRealIndex)].seller.transfer((amount * nextCheapest.amountOfETH) / (10 ** 18));
+                amountToCancel = amountToCancel + uint(vars.remainingToBuy);
+                vars.remainingToBuy = 0;
+            }else{
+                //vars.price= (amount * firstCheapest.amountOfETH) / (10 ** 18);
+                //sellingInstances[uint(nextCheapestRealIndex)].seller.transfer(vars.price);
+                amountToCancel = amountToCancel + sellingInstances[uint(nextCheapestRealIndex)].amountToSell;
+                vars.remainingToBuy = vars.remainingToBuy - int(sellingInstances[uint(nextCheapestRealIndex)].amountToSell);
+                sellingInstances[uint(nextCheapestRealIndex)].amountToSell=0;
+                vars.nextCheapestIndex = getNextCheapestForSeller(tokenAddress,firstCheapest, sortedArray, msg.sender);
+            }
+        }
+        (vars.sent) = newToken.transfer(msg.sender, amountToCancel);
+        require(vars.sent, "Failed to return token to seller");
+        //maybe emit an event
+    }
+
 
     /**
     * @notice Allow the owner of the contract to withdraw ETH
