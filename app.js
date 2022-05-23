@@ -7,7 +7,7 @@ const cors = require('cors')
 const mongoose = require('mongoose');
 require("./handlers/passport")
 const expFileUpload = require("express-fileupload");
-
+require('dotenv').config()
 
 
 var indexRouter = require('./routes/index');
