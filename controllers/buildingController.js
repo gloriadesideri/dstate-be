@@ -31,7 +31,6 @@ exports.createSetPriceTransaction = async (req,res, next)=>{
     var TokenData = JSON.parse(fs.readFileSync(pathToTokenFile));
     var myContract = new web3.eth.Contract(data.abi, "0x392F7bAccBfE1324df91298ae9Ffc153111CED7c");
     var tokenContract = new web3.eth.Contract(TokenData.abi, req.body.tokenAddress);
-    console.log(process.env.BUY_SEELL_ADDRESS)
     const allowance = await tokenContract.methods.allowance(req.user.publicAddress,"0x392F7bAccBfE1324df91298ae9Ffc153111CED7c").call({from: req.user.publicAddress})
     var remaining = BigInt(allowance)
 
@@ -46,27 +45,24 @@ exports.createSetPriceTransaction = async (req,res, next)=>{
 exports.getPriceForTokens= async (req,res,next)=>{
     const pathToFile=path.join(__dirname,'../solidity/build/contracts','BuySell.json')
     var data = JSON.parse(fs.readFileSync(pathToFile));
-    var myContract = new web3.eth.Contract(data.abi, process.env.BUY_SEELL_ADDRESS);
-    const res_from_get_price = await myContract.methods.getPriceForTokens(BigInt(req.body.tokenAmount*Math.pow(10, 18)),req.body.tokenAddress).call({from: req.user.publicAddress})
-    console.log(res_from_get_price);
+    var myContract = new web3.eth.Contract(data.abi, "0x392F7bAccBfE1324df91298ae9Ffc153111CED7c");
+    const res_from_get_price = await myContract.methods.getPriceForTokens(req.body.tokenAddress, BigInt(req.body.tokenAmount*Math.pow(10, 18))).call({from: req.user.publicAddress})
     res.send({price: res_from_get_price})
 }
 exports.createBuyTokenTransaction = async (req,res,next)=>{
     const pathToFile=path.join(__dirname,'../solidity/build/contracts','BuySell.json')
     var data = JSON.parse(fs.readFileSync(pathToFile));
-    var myContract = new web3.eth.Contract(data.abi, process.env.BUY_SEELL_ADDRESS);
-    var encodedABI= await myContract.methods.buyTokens(req.body.tokenAddress, BigInt(req.body.promisedPrice*Math.pow(10, 18)),BigInt(req.body.tokenAmount*Math.pow(10, 18)) ).encodeABI();
+    var myContract = new web3.eth.Contract(data.abi, "0x392F7bAccBfE1324df91298ae9Ffc153111CED7c");
+    var encodedABI= await myContract.methods.buyTokens(req.body.tokenAddress, BigInt(req.body.promisedPrice),BigInt(req.body.tokenAmount*Math.pow(10, 18)) ).encodeABI();
     res.send({abi:encodedABI})
 }
 exports.createToken = async (req,res,next)=>{
-    console.log(req.body)
     let tx = await web3.eth.getTransaction(req.body.transactionHash)
     while(tx.blockNumber == null){
         tx = await web3.eth.getTransaction(req.body.transactionHash)
     }
     let receipt = await web3.eth.getTransactionReceipt(req.body.transactionHash)
 
-    console.log(receipt.contractAddress)
 
     let token = await Token.create({
         name: req.body.name,
@@ -91,7 +87,6 @@ exports.create= async (req, res)=>{
     return res.send({building: building});
 }
 exports.uploadDocument = async (req, res) =>{
-    console.log( req.files);
     if(!req.files) {
         res.send({
             status: false,
@@ -99,7 +94,6 @@ exports.uploadDocument = async (req, res) =>{
         });
     }else{
         const filesAdded = await ipfs.add(req.files.document.data)
-        console.log(filesAdded)
         return res.send(filesAdded)
     }
 }
@@ -134,7 +128,6 @@ exports.approveToken = async (req,res)=>{
     const building = await Building.findOne({_id:req.body.building_id}).populate("token_id", "-__v").select("-__v");
     var myContract = new web3.eth.Contract(TokenData.abi, building.token_id.address);
     var encodedABI= await myContract.methods.approve("0x392F7bAccBfE1324df91298ae9Ffc153111CED7c", BigInt(Math.pow(10,60))).encodeABI();
-    console.log(encodedABI)
     res.send({abi:encodedABI})
 }
 
