@@ -12,7 +12,7 @@ const walletAPIUrl = 'https://rinkeby.infura.io/v3/2af9187666bc4f2485d90c76f9727
 
 const web3 = new Web3(walletAPIUrl);
 
-exports.getEncodedABI = async (req, res, next) => {
+exports.deployToken = async (req, res, next) => {
 
     const pathToFile=path.join(__dirname,'../solidity/build/contracts','NewToken.json')
     var data = JSON.parse(fs.readFileSync(pathToFile));

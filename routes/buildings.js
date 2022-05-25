@@ -6,7 +6,7 @@ const multer  = require('multer');
 const passport = require('passport');
 const middlewares = require("../handlers/middlewares")
 
-router.post("/deploy",passport.authenticate("jwt",{session: false}),middlewares.checkForBuildingApproval, buildingController.getEncodedABI );
+router.post("/deploy",passport.authenticate("jwt",{session: false}),middlewares.checkForBuildingApproval, buildingController.deployToken );
 router.post("/document",passport.authenticate("jwt",{session: false}),buildingController.uploadDocument );
 router.post("/",passport.authenticate("jwt",{session: false}),buildingController.create );
 router.post("/createToken",passport.authenticate("jwt",{session: false}),middlewares.checkForBuildingApproval, buildingController.createToken );

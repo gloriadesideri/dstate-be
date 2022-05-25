@@ -26,7 +26,8 @@ const buildingSchema = new mongoose.Schema({
     },
     approved:{
         type: Boolean,
-        default: false
+        //TODO: SET TO FALSE IN PROD
+        default: true
     }
 
 
