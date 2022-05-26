@@ -28,6 +28,9 @@ const buildingSchema = new mongoose.Schema({
         type: Boolean,
         //TODO: SET TO FALSE IN PROD
         default: true
+    },
+    rentContractAddress:{
+        type:String
     }
 
 

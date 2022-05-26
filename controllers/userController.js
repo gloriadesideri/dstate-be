@@ -1,5 +1,8 @@
 const User = require('../models/User');
+const Web3 = require('web3')
+const walletAPIUrl = 'https://rinkeby.infura.io/v3/2af9187666bc4f2485d90c76f9727138';
 
+const web3 = new Web3(walletAPIUrl);
 exports.find = async (req, res, next) => {
     // If a query string ?publicAddress=... is given, then filter results
     const whereClause =
@@ -36,4 +39,9 @@ exports.create = async (req, res, next) =>{
     User.create(req.body)
         .then((doc) => res.json({user:doc}))
         .catch(next);
+}
+exports.balanceInETH= async (req,res,next)=>{
+    var balanceInGwei =await  web3.eth.getBalance(req.user.publicAddress);
+    var balanceInEth = balanceInGwei/ 10**18
+    res.send({balance:balanceInEth})
 }
