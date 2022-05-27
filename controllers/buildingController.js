@@ -17,7 +17,7 @@ exports.deployToken = async (req, res, next) => {
     var myContract = new web3.eth.Contract(data.abi);
     let encodedABI=await myContract.deploy({
         data: data.bytecode,
-        arguments: [req.body.initial_amount, req.body.name, req.body.symbol]
+        arguments: [req.body.initial_amount, req.body.name, req.body.symbol, BigInt(req.body.rentPrice), BigInt(req.body.depositPrice), req.body.remainingMonths, req.body.caretakerShare, req.body.caretaker, req.body.tenant]
     }).encodeABI()
     const nonce = await web3.eth.getTransactionCount( req.user.publicAddress );
     res.send({abi:encodedABI, nonce: nonce})
