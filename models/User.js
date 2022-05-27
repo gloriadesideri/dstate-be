@@ -34,7 +34,9 @@ const userSchema = new mongoose.Schema({
     role:{
         type: String,
         default: "user"
-    }
+    },
+    token_ids:[{type:mongoose.Schema.ObjectId,
+        ref:'Token'}]
 
 
     //isVerified: { type: Boolean, default: false },

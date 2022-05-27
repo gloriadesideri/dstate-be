@@ -4,11 +4,13 @@ pragma solidity ^0.8.4;
 
 import "./NewToken.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 
 contract Rent is Ownable{
 
     struct rent {
-        uint tokenAmount; //number of tokens that exist (not in 10**18)
+        ERC20 token; //used for number of tokens that exist (not in 10**18)
         uint rentPrice;
         uint depositPrice;
         uint currentDeposit;
@@ -35,8 +37,8 @@ contract Rent is Ownable{
 
     
     constructor(uint _rentPrice, uint _depositPrice, uint _remainingMonths, uint _caretakerShare, address payable _caretaker, address payable _tenant, address _votingContract, address _tokenAddress) {
-        ERC20 token = ERC20(_tokenAddress);
-        rentInfo.tokenAmount = token.totalSupply() / (10**18);
+        rentInfo.token = ERC20(_tokenAddress);
+        //rentInfo.tokenAmount = token.totalSupply() / (10**18);
         rentInfo.rentPrice = _rentPrice;
         rentInfo.depositPrice = _depositPrice;
         rentInfo.currentDeposit = 0;
@@ -193,7 +195,7 @@ contract Rent is Ownable{
             require(msg.value >= rentInfo.rentPrice, "Not enough eth to cover rent");
             rentInfo.rentBlock[rentInfo.rentNumber] = block.number;
             rentInfo.caretaker.transfer((rentInfo.caretakerShare * msg.value) / 100);
-            rentInfo.rentAmountPerToken[rentInfo.rentNumber] = (msg.value - ((rentInfo.caretakerShare * msg.value) / 100)) / rentInfo.tokenAmount;
+            rentInfo.rentAmountPerToken[rentInfo.rentNumber] = (msg.value - ((rentInfo.caretakerShare * msg.value) / 100)) / (rentInfo.token.totalSupply() / (10**18));
             rentInfo.remainingMonths -= 1; 
             rentInfo.status = 3;
             if(rentInfo.remainingMonths == 0) {
@@ -206,7 +208,7 @@ contract Rent is Ownable{
             require(msg.value >= rentInfo.rentPrice + rentInfo.depositPrice, "Not enough eth to cover rent & deposit");
             rentInfo.rentBlock[rentInfo.rentNumber] = block.number;
             rentInfo.caretaker.transfer((rentInfo.caretakerShare * rentInfo.rentPrice) / 100);
-            rentInfo.rentAmountPerToken[rentInfo.rentNumber] = (rentInfo.rentPrice - ((rentInfo.caretakerShare * rentInfo.rentPrice) / 100)) / rentInfo.tokenAmount;
+            rentInfo.rentAmountPerToken[rentInfo.rentNumber] = (rentInfo.rentPrice - ((rentInfo.caretakerShare * rentInfo.rentPrice) / 100)) / (rentInfo.token.totalSupply() / (10**18));
             rentInfo.currentDeposit = msg.value - rentInfo.rentPrice;
             rentInfo.remainingMonths -= 1; 
             rentInfo.status = 3;

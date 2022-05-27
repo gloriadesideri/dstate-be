@@ -63,8 +63,10 @@ exports.createToken = async (req,res,next)=>{
         tx = await web3.eth.getTransaction(req.body.transactionHash)
     }
     let receipt = await web3.eth.getTransactionReceipt(req.body.transactionHash)
-
-
+    const pathToTokenFile=path.join(__dirname,'../solidity/build/contracts','NewToken.json')
+    var TokenData = JSON.parse(fs.readFileSync(pathToTokenFile));
+    var myContract = new web3.eth.Contract(TokenData.abi, receipt.contractAddress);
+    var rentAddress= await myContract.methods.rent().call({from: req.user.publicAddress})
     let token = await Token.create({
         name: req.body.name,
         symbol: req.body.symbol,
@@ -74,7 +76,7 @@ exports.createToken = async (req,res,next)=>{
     })
     let building = await Building.findOneAndUpdate(
         { "_id" : req.body.building_id },
-        { "token_id" : token._id  }
+        { "token_id" : token._id  ,"rentContractAddress":rentAddress},
     )
     return res.send({building: building, token: token})
 
