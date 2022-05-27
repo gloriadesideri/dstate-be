@@ -19,7 +19,7 @@ exports.deployToken = async (req, res, next) => {
         data: data.bytecode,
         arguments: [req.body.initial_amount, req.body.name, req.body.symbol]
     }).encodeABI()
-    const nonce = web3.eth.getTransactionCount( req.user.publicAddress );
+    const nonce = await web3.eth.getTransactionCount( req.user.publicAddress );
     res.send({abi:encodedABI, nonce: nonce})
 
 }
@@ -38,7 +38,7 @@ exports.createSetPriceTransaction = async (req,res, next)=>{
     }
     else{
         let encodedABI=await myContract.methods.setPrice(BigInt(req.body.amountOfETH*Math.pow(10, 18)),BigInt(req.body.tokenAmount*Math.pow(10, 18)),req.body.tokenAddress).encodeABI()
-        const nonce = web3.eth.getTransactionCount( req.user.publicAddress );
+        const nonce = await web3.eth.getTransactionCount( req.user.publicAddress );
         res.send({abi:encodedABI, nonce: nonce})
     }
 }
@@ -54,7 +54,7 @@ exports.createBuyTokenTransaction = async (req,res,next)=>{
     var data = JSON.parse(fs.readFileSync(pathToFile));
     var myContract = new web3.eth.Contract(data.abi, "0x392F7bAccBfE1324df91298ae9Ffc153111CED7c");
     var encodedABI= await myContract.methods.buyTokens(req.body.tokenAddress, BigInt(req.body.promisedPrice),BigInt(req.body.tokenAmount*Math.pow(10, 18)) ).encodeABI();
-    const nonce = web3.eth.getTransactionCount( req.user.publicAddress );
+    const nonce = await web3.eth.getTransactionCount( req.user.publicAddress );
     res.send({abi:encodedABI, nonce: nonce})
 }
 exports.createToken = async (req,res,next)=>{
@@ -129,7 +129,7 @@ exports.approveToken = async (req,res)=>{
     const building = await Building.findOne({_id:req.body.building_id}).populate("token_id", "-__v").select("-__v");
     var myContract = new web3.eth.Contract(TokenData.abi, building.token_id.address);
     var encodedABI= await myContract.methods.approve("0x392F7bAccBfE1324df91298ae9Ffc153111CED7c", BigInt(Math.pow(10,60))).encodeABI();
-    const nonce = web3.eth.getTransactionCount( req.user.publicAddress );
+    const nonce = await web3.eth.getTransactionCount( req.user.publicAddress );
     res.send({abi:encodedABI, nonce: nonce})
 }
 
@@ -138,7 +138,7 @@ exports.cancelSaleFromContract= async (req,res,next)=>{
     var data = JSON.parse(fs.readFileSync(pathToFile));
     var myContract = new web3.eth.Contract(data.abi, "0x392F7bAccBfE1324df91298ae9Ffc153111CED7c");
     var encodedABI= await myContract.methods.cancelSale(req.body.tokenAddress, BigInt(req.body.tokenAmount*Math.pow(10, 18)) ).encodeABI();
-    const nonce = web3.eth.getTransactionCount( req.user.publicAddress );
+    const nonce = await web3.eth.getTransactionCount( req.user.publicAddress );
     res.send({abi:encodedABI, nonce: nonce})
 }
 
@@ -151,7 +151,7 @@ exports.createPayRentTransaction = async (req,res,next)=>{
     var rentPrice = await RentContract.methods.getRentPrice().call({from: req.user.publicAddress});
 
     const encodedABI= await RentContract.methods.payRent().encodeABI();
-    const nonce = web3.eth.getTransactionCount( req.user.publicAddress );
+    const nonce = await web3.eth.getTransactionCount( req.user.publicAddress );
     res.send({abi:encodedABI, nonce: nonce, rentPrice: rentPrice})
 }
 
@@ -162,7 +162,7 @@ exports.createWithdrawRentTransaction = async (req, res,next)=>{
     var RentContract = new web3.eth.Contract(RentData.abi, building.rentContractAddress);
 
     const encodedABI= await RentContract.methods.withdrawRent().encodeABI();
-    const nonce = web3.eth.getTransactionCount( req.user.publicAddress );
+    const nonce = await web3.eth.getTransactionCount( req.user.publicAddress );
     res.send({abi:encodedABI, nonce: nonce})
 }
 
@@ -173,7 +173,7 @@ exports.respondToProposal = async (req,res,next)=>{
     var RentContract = new web3.eth.Contract(RentData.abi, building.rentContractAddress);
 
     const encodedABI= await RentContract.methods.returnDepositAcceptance(req.body.acceptance).encodeABI();
-    const nonce = web3.eth.getTransactionCount( req.user.publicAddress );
+    const nonce = await web3.eth.getTransactionCount( req.user.publicAddress );
     res.send({abi:encodedABI, nonce: nonce})
 }
 exports.requestRentFromTenant = async (req,res,next)=>{
@@ -183,7 +183,7 @@ exports.requestRentFromTenant = async (req,res,next)=>{
     var RentContract = new web3.eth.Contract(RentData.abi, building.rentContractAddress);
 
     const encodedABI= await RentContract.methods.requestRent().encodeABI();
-    const nonce = web3.eth.getTransactionCount( req.user.publicAddress );
+    const nonce = await web3.eth.getTransactionCount( req.user.publicAddress );
     res.send({abi:encodedABI, nonce: nonce})
 }
 
@@ -194,7 +194,7 @@ exports.submitDepositProposal = async (req,res,next)=>{
     var RentContract = new web3.eth.Contract(RentData.abi, building.rentContractAddress);
 
     const encodedABI= await RentContract.methods.returnDepositProposal().encodeABI();
-    const nonce = web3.eth.getTransactionCount( req.user.publicAddress );
+    const nonce = await web3.eth.getTransactionCount( req.user.publicAddress );
     res.send({abi:encodedABI, nonce: nonce})
 }
 exports.getDepositProposal = async (req,res,next)=>{
