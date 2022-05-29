@@ -51,6 +51,8 @@ contract NewToken is ERC20, ERC20Votes {
     
 
     function createProposal(string memory _title, string memory _description, uint _proposalType, uint _uint0, uint  _uint1, uint _uint2, address _address0) public returns(uint _theId){
+        ERC20Votes token = ERC20Votes(address(this));
+        require(token.getVotes(msg.sender) > 0, "You must own some tokens to create a Proposal");
         proposal memory prop = proposal(_title, _description, _proposalType, proposalNumber, block.number, _uint0,  _uint1, _uint2, _address0);
         proposals[proposalNumber] = prop;
         votes[proposalNumber] = 0;

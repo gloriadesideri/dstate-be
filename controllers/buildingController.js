@@ -150,7 +150,7 @@ exports.createPayRentTransaction = async (req,res,next)=>{
     const building = await  Building.findOne({_id: req.body.building_id})
     var RentContract = new web3.eth.Contract(RentData.abi, building.rentContractAddress);
 
-    var rentPrice = await RentContract.methods.getRentPrice().call({from: req.user.publicAddress});
+    var rentPrice = await RentContract.methods.getRentAndDepositPrice().call({from: req.user.publicAddress});
 
     const encodedABI= await RentContract.methods.payRent().encodeABI();
     const nonce = await web3.eth.getTransactionCount( req.user.publicAddress );
@@ -164,6 +164,17 @@ exports.createWithdrawRentTransaction = async (req, res,next)=>{
     var RentContract = new web3.eth.Contract(RentData.abi, building.rentContractAddress);
 
     const encodedABI= await RentContract.methods.withdrawRent().encodeABI();
+    const nonce = await web3.eth.getTransactionCount( req.user.publicAddress );
+    res.send({abi:encodedABI, nonce: nonce})
+}
+
+exports.createWithdrawPreviousRentTransaction = async (req, res,next)=>{
+    const pathToRentFile=path.join(__dirname,'../solidity/build/contracts','Rent.json')
+    var RentData = JSON.parse(fs.readFileSync(pathToRentFile));
+    const building = await  Building.findOne({_id: req.body.building_id})
+    var RentContract = new web3.eth.Contract(RentData.abi, building.rentContractAddress);
+
+    const encodedABI= await RentContract.methods.withdrawPreviousRent(req.body.missed).encodeABI();
     const nonce = await web3.eth.getTransactionCount( req.user.publicAddress );
     res.send({abi:encodedABI, nonce: nonce})
 }

@@ -37,7 +37,6 @@ router.post("/getDepositProposal",passport.authenticate("jwt",{session: false}),
 
 // accept/decline deposit proposal
 router.post("/respondToProposal", passport.authenticate("jwt",{session: false}), middlewares.checkForBuildingApproval, buildingController.respondToProposal);
-
-
+router.post("/withdrawPreviousRent", passport.authenticate("jwt",{session: false}), middlewares.checkForBuildingApproval,buildingController.createWithdrawPreviousRentTransaction)
 
 module.exports = router;
