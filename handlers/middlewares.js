@@ -44,7 +44,7 @@ exports.checkCaretaker = async (req, res, next)=>{
     var RentContract = new web3.eth.Contract(RentData.abi, building.rentContractAddress);
     const caretaker= await RentContract.methods.getCaretaker().call({from: req.user.publicAddress})
 
-    if(caretaker == req.user.publicAddress){
+    if(caretaker.toLowerCase() == req.user.publicAddress){
         next();
     }else{
         return res.send(401, "You are not the caretaker")
