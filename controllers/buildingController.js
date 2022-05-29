@@ -179,9 +179,12 @@ exports.respondToProposal = async (req,res,next)=>{
     res.send({abi:encodedABI, nonce: nonce})
 }
 exports.requestRentFromTenant = async (req,res,next)=>{
+    console.log("hello")
     const pathToRentFile=path.join(__dirname,'../solidity/build/contracts','Rent.json')
     var RentData = JSON.parse(fs.readFileSync(pathToRentFile));
     const building = await  Building.findOne({_id: req.body.building_id})
+    
+    console.log(building.rentContractAddress)
     var RentContract = new web3.eth.Contract(RentData.abi, building.rentContractAddress);
 
     const encodedABI= await RentContract.methods.requestRent().encodeABI();
@@ -195,7 +198,7 @@ exports.submitDepositProposal = async (req,res,next)=>{
     const building = await  Building.findOne({_id: req.body.building_id})
     var RentContract = new web3.eth.Contract(RentData.abi, building.rentContractAddress);
 
-    const encodedABI= await RentContract.methods.returnDepositProposal().encodeABI();
+    const encodedABI= await RentContract.methods.returnDepositProposal(req.body.suggestedAmount).encodeABI();
     const nonce = await web3.eth.getTransactionCount( req.user.publicAddress );
     res.send({abi:encodedABI, nonce: nonce})
 }
