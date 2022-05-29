@@ -66,6 +66,15 @@ contract Rent is Ownable{
         return rentInfo.depositPrice;
     }
 
+    function getRentAndDepositPrice() public view returns(uint _price) {
+        if(rentInfo.currentDeposit != 0){
+            return rentInfo.rentPrice;
+        }
+        else {
+            return (rentInfo.rentPrice + rentInfo.depositPrice);
+        }
+    }
+
     function getCurrentDeposit() public view returns(uint _currentDeposit){
         return rentInfo.currentDeposit;
     }
