@@ -16,8 +16,8 @@ exports.checkAdminRole = async (req, res, next) => {
 }
 exports.checkForBuildingApproval = async (req, res ,next)=>{
     const building = await Building.findOne({_id: req.body.building_id})
+    console.log(building)
     if(!building.approved){
-        res.send(400, "building needs to be approved")
     }else{
         next()
     }
@@ -30,8 +30,7 @@ exports.checkTenancy = async (req, res, next)=>{
     const building = await  Building.findOne({_id: req.body.building_id})
     var RentContract = new web3.eth.Contract(RentData.abi, building.rentContractAddress);
     const tenant= await RentContract.methods.getTenant().call({from: req.user.publicAddress})
-
-    if(tenant == req.user.publicAddress){
+    if(tenant.toLowerCase() == req.user.publicAddress){
         next();
     }else{
         return res.send(401, "You are not the tenant")
@@ -45,7 +44,7 @@ exports.checkCaretaker = async (req, res, next)=>{
     var RentContract = new web3.eth.Contract(RentData.abi, building.rentContractAddress);
     const caretaker= await RentContract.methods.getCaretaker().call({from: req.user.publicAddress})
 
-    if(caretaker == req.user.publicAddress){
+    if(caretaker.toLowerCase() == req.user.publicAddress){
         next();
     }else{
         return res.send(401, "You are not the caretaker")

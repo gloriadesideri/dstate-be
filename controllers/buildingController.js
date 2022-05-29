@@ -17,7 +17,7 @@ exports.deployToken = async (req, res, next) => {
     var myContract = new web3.eth.Contract(data.abi);
     let encodedABI=await myContract.deploy({
         data: data.bytecode,
-        arguments: [req.body.initial_amount, req.body.name, req.body.symbol]
+        arguments: [req.body.initial_amount, req.body.name, req.body.symbol, BigInt(req.body.rentPrice), BigInt(req.body.depositPrice), req.body.remainingMonths, req.body.caretakerShare, req.body.caretaker, req.body.tenant]
     }).encodeABI()
     const nonce = await web3.eth.getTransactionCount( req.user.publicAddress );
     res.send({abi:encodedABI, nonce: nonce})
@@ -150,7 +150,7 @@ exports.createPayRentTransaction = async (req,res,next)=>{
     const building = await  Building.findOne({_id: req.body.building_id})
     var RentContract = new web3.eth.Contract(RentData.abi, building.rentContractAddress);
 
-    var rentPrice = await RentContract.methods.getRentPrice().call({from: req.user.publicAddress});
+    var rentPrice = await RentContract.methods.getRentAndDepositPrice().call({from: req.user.publicAddress});
 
     const encodedABI= await RentContract.methods.payRent().encodeABI();
     const nonce = await web3.eth.getTransactionCount( req.user.publicAddress );
@@ -168,6 +168,17 @@ exports.createWithdrawRentTransaction = async (req, res,next)=>{
     res.send({abi:encodedABI, nonce: nonce})
 }
 
+exports.createWithdrawPreviousRentTransaction = async (req, res,next)=>{
+    const pathToRentFile=path.join(__dirname,'../solidity/build/contracts','Rent.json')
+    var RentData = JSON.parse(fs.readFileSync(pathToRentFile));
+    const building = await  Building.findOne({_id: req.body.building_id})
+    var RentContract = new web3.eth.Contract(RentData.abi, building.rentContractAddress);
+
+    const encodedABI= await RentContract.methods.withdrawPreviousRent(req.body.missed).encodeABI();
+    const nonce = await web3.eth.getTransactionCount( req.user.publicAddress );
+    res.send({abi:encodedABI, nonce: nonce})
+}
+
 exports.respondToProposal = async (req,res,next)=>{
     const pathToRentFile=path.join(__dirname,'../solidity/build/contracts','Rent.json')
     var RentData = JSON.parse(fs.readFileSync(pathToRentFile));
@@ -179,9 +190,12 @@ exports.respondToProposal = async (req,res,next)=>{
     res.send({abi:encodedABI, nonce: nonce})
 }
 exports.requestRentFromTenant = async (req,res,next)=>{
+    console.log("hello")
     const pathToRentFile=path.join(__dirname,'../solidity/build/contracts','Rent.json')
     var RentData = JSON.parse(fs.readFileSync(pathToRentFile));
     const building = await  Building.findOne({_id: req.body.building_id})
+    
+    console.log(building.rentContractAddress)
     var RentContract = new web3.eth.Contract(RentData.abi, building.rentContractAddress);
 
     const encodedABI= await RentContract.methods.requestRent().encodeABI();
@@ -195,7 +209,7 @@ exports.submitDepositProposal = async (req,res,next)=>{
     const building = await  Building.findOne({_id: req.body.building_id})
     var RentContract = new web3.eth.Contract(RentData.abi, building.rentContractAddress);
 
-    const encodedABI= await RentContract.methods.returnDepositProposal().encodeABI();
+    const encodedABI= await RentContract.methods.returnDepositProposal(req.body.suggestedAmount).encodeABI();
     const nonce = await web3.eth.getTransactionCount( req.user.publicAddress );
     res.send({abi:encodedABI, nonce: nonce})
 }
