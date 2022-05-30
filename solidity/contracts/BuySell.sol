@@ -67,40 +67,42 @@ contract BuySell is Ownable {
     }
 
     function getNextCheapest(address tokenAddress, sellingInstance memory previousCheapest, sellingInstance[] memory sortedArray) private pure returns (int instanceIndex){
-
+        //fix for when there is cheapest array with 0 for sale
 
         for (uint j = 0; j < sortedArray.length; j++) {
             if (sortedArray[j].tokenAddress == tokenAddress && sortedArray[j].amountOfETH> previousCheapest.amountOfETH) {
-                return int(sortedArray[j].id); //changed from returning j
+                return int(j); //changed from returning j
             }
         }
         return -1;
 
     }
     function getFirstCheapest(address tokenAddress, sellingInstance[] memory sortedArray) private pure returns(int instanceIndex){
+        //fix for when there is cheapest array with 0 for sale
         for (uint j = 0; j < sortedArray.length; j++) {
             if (sortedArray[j].tokenAddress == tokenAddress) {
-                return int(sortedArray[j].id); //changed from returning j
+                return int(j); //changed from returning j
             }
         }
         return -1;
     }
 
     function getNextCheapestForSeller(address tokenAddress, sellingInstance memory previousCheapest, sellingInstance[] memory sortedArray, address sellerAddress) private pure returns (int instanceIndex){
-
+        //fix for when there is cheapest array with 0 for sale
 
         for (uint j = 0; j < sortedArray.length; j++) {
             if (sortedArray[j].tokenAddress == tokenAddress && sortedArray[j].amountOfETH> previousCheapest.amountOfETH && sortedArray[j].seller == sellerAddress) {
-                return int(sortedArray[j].id); //changed from returning j
+                return int(j); //changed from returning j
             }
         }
         return -1;
 
     }
     function getFirstCheapestForSeller(address tokenAddress, sellingInstance[] memory sortedArray, address sellerAddress) private pure returns(int instanceIndex){
+        //fix for when there is cheapest array with 0 for sale
         for (uint j = 0; j < sortedArray.length; j++) {
             if (sortedArray[j].tokenAddress == tokenAddress && sortedArray[j].seller == sellerAddress) {
-                return int(sortedArray[j].id); //changed from returning j
+                return int(j); //changed from returning j
             }
         }
         return -1;
@@ -120,7 +122,7 @@ contract BuySell is Ownable {
         if(firstCheapestIndex == -1){
             return 0;
         }
-        sellingInstance memory firstCheapest= sellingInstances[uint256(firstCheapestIndex)];
+        sellingInstance memory firstCheapest= sortedArray[uint256(firstCheapestIndex)];
 
         if(firstCheapest.amountToSell>=amount){
             price= (amount * firstCheapest.amountOfETH) / (10 ** 18);
@@ -133,7 +135,7 @@ contract BuySell is Ownable {
         }
 
         while(remainingToBuy >0 && nextCheapestIndex!=-1){
-            nextCheapest=sellingInstances[uint256(nextCheapestIndex)];
+            nextCheapest=sortedArray[uint256(nextCheapestIndex)];
             if(nextCheapest.amountToSell>=remainingToBuy){
                 price= price + ((remainingToBuy * nextCheapest.amountOfETH) / (10 ** 18));
                 return price;
@@ -192,7 +194,7 @@ contract BuySell is Ownable {
         require(vars.firstCheapestIndex != -1, "No tokens available");
 
         sellingInstance memory firstCheapest= sortedArray[uint(vars.firstCheapestIndex)];
-        int firstCheapestRealIndex = find(firstCheapest.id);
+        int firstCheapestRealIndex = int(firstCheapest.id);
 
         if(firstCheapest.amountToSell>=amount){
             sellingInstances[uint(firstCheapestRealIndex)].amountToSell = sellingInstances[uint(firstCheapestRealIndex)].amountToSell -amount;
@@ -209,7 +211,7 @@ contract BuySell is Ownable {
         }
         while(vars.remainingToBuy >0 && vars.nextCheapestIndex!=-1){
             nextCheapest=sellingInstances[uint(vars.nextCheapestIndex)];
-            int nextCheapestRealIndex = find(nextCheapest.id);
+            int nextCheapestRealIndex = int(nextCheapest.id);
             if(int(nextCheapest.amountToSell)>=vars.remainingToBuy){
 
                 sellingInstances[uint(nextCheapestRealIndex)].amountToSell = sellingInstances[uint(nextCheapestRealIndex)].amountToSell -uint(vars.remainingToBuy);
@@ -264,7 +266,7 @@ contract BuySell is Ownable {
         uint amountToCancel = 0;
 
         sellingInstance memory firstCheapest= sortedArray[uint(vars.firstCheapestIndex)];
-        int firstCheapestRealIndex = find(firstCheapest.id);
+        int firstCheapestRealIndex = int(firstCheapest.id);
 
         if(firstCheapest.amountToSell>=amount){
             sellingInstances[uint(firstCheapestRealIndex)].amountToSell = sellingInstances[uint(firstCheapestRealIndex)].amountToSell -amount;
@@ -280,7 +282,7 @@ contract BuySell is Ownable {
         }
         while(vars.remainingToBuy > 0 && vars.nextCheapestIndex!=-1){
             nextCheapest=sellingInstances[uint(vars.nextCheapestIndex)];
-            int nextCheapestRealIndex = find(nextCheapest.id);
+            int nextCheapestRealIndex = int(nextCheapest.id);
             if(nextCheapest.amountToSell>=uint(vars.remainingToBuy)){
                 sellingInstances[uint(nextCheapestRealIndex)].amountToSell = sellingInstances[uint(nextCheapestRealIndex)].amountToSell -uint(vars.remainingToBuy);
                 //sellingInstances[uint(nextCheapestRealIndex)].seller.transfer((amount * nextCheapest.amountOfETH) / (10 ** 18));

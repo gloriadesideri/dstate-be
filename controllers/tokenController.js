@@ -2,6 +2,7 @@ const Token = require('../models/Token')
 const path = require("path");
 const fs = require("fs");
 const Web3 = require('web3')
+const User = require("../models/User");
 const walletAPIUrl = 'https://rinkeby.infura.io/v3/2af9187666bc4f2485d90c76f9727138';
 
 const web3 = new Web3(walletAPIUrl);
@@ -15,7 +16,7 @@ async function getBalance(userAddress, tokenAddress){
 }
 
 exports.balanceOfTokens =async (req,res,next) => {
-    const balanceInEth= await getBalance(req.user.publicAddress, req.body.tokenAddress);
+    const balanceInEth= await getBalance(req.user.publicAddress, req.query.tokenAddress);
     res.send({balance: balanceInEth})
 }
 exports.createProposal= async (req,res,next)=>{
@@ -64,4 +65,12 @@ exports.submitVote= async (req,res,next)=>{
     var encodedABI=await tokenContract.methods.vote(req.body.proposalId).encodeABI()
     const nonce = await web3.eth.getTransactionCount( req.user.publicAddress );
     res.send({abi:encodedABI, nonce: nonce})
+}
+exports.addToken= async (req, res, next)=>{
+    const token = await Token.findOne({"_id":req.body.tokenId});
+    let user = await  User.findOneAndUpdate(
+        {"_id": req.user._id},
+        {$push: { "token_ids": token._id } }
+    )
+    res.send({user: user})
 }
