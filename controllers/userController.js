@@ -41,7 +41,9 @@ exports.create = async (req, res, next) =>{
         .catch(next);
 }
 exports.balanceInETH= async (req,res,next)=>{
+    console.log("balance in eth")
     var balanceInGwei =await  web3.eth.getBalance(req.user.publicAddress);
+    console.log(balanceInGwei)
     var balanceInEth = balanceInGwei/ 10**18
     res.send({balance:balanceInEth})
 }

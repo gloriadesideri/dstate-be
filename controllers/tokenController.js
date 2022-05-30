@@ -15,7 +15,7 @@ async function getBalance(userAddress, tokenAddress){
 }
 
 exports.balanceOfTokens =async (req,res,next) => {
-    const balanceInEth= await getBalance(req.user.publicAddress, req.body.tokenAddress);
+    const balanceInEth= await getBalance(req.user.publicAddress, req.query.tokenAddress);
     res.send({balance: balanceInEth})
 }
 exports.createProposal= async (req,res,next)=>{
