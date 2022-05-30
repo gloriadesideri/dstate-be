@@ -7,6 +7,7 @@ const Building = require ('../models/Building')
 const User = require ('../models/User')
 
 const ipfsClient = require ('ipfs-http-client');
+const nodemailer = require("nodemailer");
 const ipfs= ipfsClient.create('https://ipfs.infura.io:5001/api/v0')
 const walletAPIUrl = 'https://rinkeby.infura.io/v3/2af9187666bc4f2485d90c76f9727138';
 
@@ -227,4 +228,28 @@ exports.getDepositProposal = async (req,res,next)=>{
 
     const proposedPercentage= await RentContract.methods.getDepositProposal().call({from: req.user.publicAddress});
     res.send({percentage: proposedPercentage})
+}
+exports.sendEmail =async (req,res,next)=>{
+    let testAccount = await nodemailer.createTestAccount();
+
+
+    /* GET home page. */
+    let transporter = nodemailer.createTransport({
+        host: "smtp.ethereal.email",
+        port: 587,
+        secure: false, // true for 465, false for other ports
+        auth: {
+            user: 'pz3p6whwjuicgrpy@ethereal.email', // generated ethereal user
+            pass: 'aFjdfWbP8SjvpvQ9ha', // generated ethereal password
+        },
+    });
+    let info =await transporter.sendMail({
+        from: 'support@dstate.com', // sender address
+        to: "gloriadesideri00@gmail.com", // list of receivers
+        subject: "Hello from dstate", // Subject line
+        text: "Hey I just sent an email", // plain text body
+        //html: "<b>Hello world?</b>", // html body
+    })
+    res.send(info)
+
 }

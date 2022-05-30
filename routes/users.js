@@ -15,5 +15,6 @@ userRouter.route('/:userId').get(passport.authenticate('jwt',{session:false}), u
 
 /** POST /api/users */
 userRouter.route('/').post(userController.create);
+userRouter.get("/profile/:userId",passport.authenticate('jwt',{session:false}), userController.profile)
 
 module.exports = userRouter;
