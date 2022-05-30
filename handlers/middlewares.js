@@ -65,5 +65,4 @@ exports.checkBalance = async (req,res,next) =>{
         }
     }
     next();
-
 }

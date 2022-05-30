@@ -123,8 +123,8 @@ exports.approveBuilding = async (req, res)=>{
 }
 
 exports.fetchBuildings = async (req,res)=>{
-    let buildings;
-    if(req.params.building_id){
+    let buildings=[];
+    if(req.query.building_id){
         let building = await Building.findOne({id:req.params.building_id}).populate("token_id", "-__v").select("-__v");
         buildings.push(building)
     }else{

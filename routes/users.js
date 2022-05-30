@@ -1,6 +1,7 @@
 var express = require('express');
 var userRouter = express.Router();
 const userController = require('../controllers/userController');
+const middlewares = require("../handlers/middlewares")
 
 const passport=require('passport');
 
@@ -15,6 +16,6 @@ userRouter.route('/:userId').get(passport.authenticate('jwt',{session:false}), u
 
 /** POST /api/users */
 userRouter.route('/').post(userController.create);
-userRouter.get("/profile/:userId",passport.authenticate('jwt',{session:false}), userController.profile)
+userRouter.get("/profile/:userId",passport.authenticate('jwt',{session:false}), middlewares.checkBalance, userController.profile)
 
 module.exports = userRouter;
