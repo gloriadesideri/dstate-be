@@ -7,9 +7,11 @@ const cors = require('cors')
 const mongoose = require('mongoose');
 require("./handlers/passport")
 const expFileUpload = require("express-fileupload");
+const serverless = require("serverless-http");
+require('dotenv').config()
 
 
-var indexRouter = require('./routes/index');
+var indexRouter = require('./routes');
 var usersRouter = require('./routes/users');
 var authRouter = require('./routes/auth');
 var buildingRouter = require('./routes/buildings')
@@ -42,9 +44,10 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(expFileUpload());
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
-app.use('/auth', authRouter);
-app.use('/building', buildingRouter);
-app.use('/token', tokenRouter);
+app.use(process.env.NETLIFY_ENDPOINT+'/', indexRouter);
+app.use(process.env.NETLIFY_ENDPOINT+'/users', usersRouter);
+app.use(process.env.NETLIFY_ENDPOINT+'/auth', authRouter);
+app.use(process.env.NETLIFY_ENDPOINT+'/building', buildingRouter);
+app.use(process.env.NETLIFY_ENDPOINT+'/token', tokenRouter);
 module.exports = app;
+module.exports.handler = serverless(app);
