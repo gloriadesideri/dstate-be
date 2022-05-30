@@ -4,6 +4,8 @@ const path=require('path')
 
 const Token = require('../models/Token')
 const Building = require ('../models/Building')
+const User = require ('../models/User')
+
 const ipfsClient = require ('ipfs-http-client');
 const ipfs= ipfsClient.create('https://ipfs.infura.io:5001/api/v0')
 const walletAPIUrl = 'https://rinkeby.infura.io/v3/2af9187666bc4f2485d90c76f9727138';
@@ -77,6 +79,10 @@ exports.createToken = async (req,res,next)=>{
     let building = await Building.findOneAndUpdate(
         { "_id" : req.body.building_id },
         { "token_id" : token._id  ,"rentContractAddress":rentAddress},
+    )
+    let user = await  User.findOneAndUpdate(
+        {"_id": req.user._id},
+        {$push: { "token_ids": token._id } }
     )
     return res.send({building: building, token: token})
 
@@ -194,7 +200,7 @@ exports.requestRentFromTenant = async (req,res,next)=>{
     const pathToRentFile=path.join(__dirname,'../solidity/build/contracts','Rent.json')
     var RentData = JSON.parse(fs.readFileSync(pathToRentFile));
     const building = await  Building.findOne({_id: req.body.building_id})
-    
+
     console.log(building.rentContractAddress)
     var RentContract = new web3.eth.Contract(RentData.abi, building.rentContractAddress);
 
