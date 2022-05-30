@@ -15,6 +15,5 @@ userRouter.route('/:userId').get(passport.authenticate('jwt',{session:false}), u
 
 /** POST /api/users */
 userRouter.route('/').post(userController.create);
-userRouter.route('/balanceInEth').get(passport.authenticate('jwt',{session:false}),userController.balanceInETH)
 
 module.exports = userRouter;
