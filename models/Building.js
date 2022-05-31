@@ -17,11 +17,11 @@ const buildingSchema = new mongoose.Schema({
         //validate: [validator.isEmail, 'Invalid email']
     },
     user_id:{
-        type:mongoose.Schema.ObjectId,
+        type:mongoose.Schema.Types.ObjectId,
         ref:'User'
     },
     token_id: {
-        type:mongoose.Schema.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref:'Token'
     },
     approved:{

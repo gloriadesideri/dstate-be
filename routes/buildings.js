@@ -1,7 +1,6 @@
 var express = require('express');
 var router = express.Router();
 const buildingController = require('../controllers/buildingController');
-const multer  = require('multer');
 //const upload = multer({ dest: os.tmpdir() });
 const passport = require('passport');
 const middlewares = require("../handlers/middlewares")
@@ -13,7 +12,7 @@ router.post("/createToken",passport.authenticate("jwt",{session: false}),middlew
 router.get("/unapproved", passport.authenticate("jwt",{session: false}), middlewares.checkAdminRole, buildingController.fetchUnapproved)
 router.post("/approve", passport.authenticate("jwt",{session: false}), middlewares.checkAdminRole, buildingController.approveBuilding)
 router.get("/", passport.authenticate("jwt",{session: false}), middlewares.checkAdminRole, buildingController.fetchBuildings)
-router.get("/approved",passport.authenticate("jwt",{session: false}), buildingController.fetchApproved)
+router.post("/approved", buildingController.fetchApproved)
 
 router.post("/createSetPriceTransaction", passport.authenticate("jwt",{session: false}), middlewares.checkForBuildingApproval, buildingController.createSetPriceTransaction)
 router.post("/getPriceForTokens", passport.authenticate("jwt",{session: false}), middlewares.checkForBuildingApproval, buildingController.getPriceForTokens)
@@ -38,5 +37,4 @@ router.post("/getDepositProposal",passport.authenticate("jwt",{session: false}),
 // accept/decline deposit proposal
 router.post("/respondToProposal", passport.authenticate("jwt",{session: false}), middlewares.checkForBuildingApproval, buildingController.respondToProposal);
 router.post("/withdrawPreviousRent", passport.authenticate("jwt",{session: false}), middlewares.checkForBuildingApproval,buildingController.createWithdrawPreviousRentTransaction)
-router.get("/sendEmail",buildingController.sendEmail)
 module.exports = router;

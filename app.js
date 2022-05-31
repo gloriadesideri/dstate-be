@@ -7,6 +7,7 @@ const cors = require('cors')
 const mongoose = require('mongoose');
 require("./handlers/passport")
 const expFileUpload = require("express-fileupload");
+require('dotenv').config()
 
 
 var indexRouter = require('./routes/index');
@@ -17,13 +18,13 @@ var tokenRouter = require('./routes/tokens')
 
 var app = express();
 
-app.use(session( { secret:"62C158BD4EFF834E4D98ACD68DDBA"} ));
+app.use(session( { secret:process.env.SESSION_SECRET} ));
 app.use(cors());
 app.use(passport.initialize());
 app.use(passport.session())
 //app.use(expressValidator());
 
-const uri = `mongodb+srv://DState-admin:3LwG9LWa2sUCEDZP@cluster0.cbsn2.mongodb.net/dstate?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://${process.env.MONGO_DB_USER}:${process.env.MONGO_DB_PS}@cluster0.cbsn2.mongodb.net/dstate?retryWrites=true&w=majority`;
 // Mongoose
 const conn = mongoose.createConnection(uri);
 
