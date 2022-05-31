@@ -248,13 +248,18 @@ exports.requestRentFromTenant = async (req, res, next) => {
     const tenant = await RentContract.methods.getTenant().call({from: req.user.publicAddress})
     const user = await User.findOne({publicAddress: tenant})
     if (user) {
-        let info = await transporter.sendMail({
-            from: 'd3state@gmail.com', // sender address
-            to: user.email, // list of receivers
-            subject: "Rent due", // Subject line
-            text: "Please pay the rent for " + building.name, // plain text body
-            //html: "<b>Hello world?</b>", // html body
-        })
+        try{
+            let info = await transporter.sendMail({
+                from: 'd3state@gmail.com', // sender address
+                to: user.email, // list of receivers
+                subject: "Rent due", // Subject line
+                text: "Please pay the rent for " + building.name, // plain text body
+                //html: "<b>Hello world?</b>", // html body
+            })
+        }catch (e){
+            console.log(e)
+        }
+
     }
     res.send({abi: encodedABI, nonce: nonce})
 }
@@ -270,13 +275,18 @@ exports.submitDepositProposal = async (req, res, next) => {
     const tenant = await RentContract.methods.getTenant().call({from: req.user.publicAddress})
     const user = await User.findOne({publicAddress: tenant})
     if (user) {
-        let info = await transporter.sendMail({
-            from: 'd3state@gmail.com', // sender address
-            to: user.email, // list of receivers
-            subject: "Check your deposit proposal", // Subject line
-            text: "The caretaker of the building " + building.name + " just submitted a deposit proposal", // plain text body
-            //html: "<b>Hello world?</b>", // html body
-        })
+        try{
+            let info = await transporter.sendMail({
+                from: 'd3state@gmail.com', // sender address
+                to: user.email, // list of receivers
+                subject: "Check your deposit proposal", // Subject line
+                text: "The caretaker of the building " + building.name + " just submitted a deposit proposal", // plain text body
+                //html: "<b>Hello world?</b>", // html body
+            })
+        }catch (e) {
+            console.log(e)
+        }
+
     }
     res.send({abi: encodedABI, nonce: nonce})
 }
