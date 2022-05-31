@@ -53,7 +53,7 @@ exports.createSetPriceTransaction = async (req, res, next) => {
     } else {
         let encodedABI = await myContract.methods.setPrice(BigInt(req.body.amountOfETH * Math.pow(10, 18)), BigInt(req.body.tokenAmount * Math.pow(10, 18)), req.body.tokenAddress).encodeABI()
         const nonce = await web3.eth.getTransactionCount(req.user.publicAddress);
-        res.send({abi: encodedABI, nonce: nonce})
+        res.send({abi: encodedABI, nonce: nonce, approve:false})
     }
 }
 exports.getPriceForTokens = async (req, res, next) => {
@@ -177,7 +177,7 @@ exports.approveToken = async (req, res) => {
     var myContract = new web3.eth.Contract(TokenData.abi, building.token_id.address);
     var encodedABI = await myContract.methods.approve(process.env.BUY_SEELL_ADDRESS, BigInt(Math.pow(10, 60))).encodeABI();
     const nonce = await web3.eth.getTransactionCount(req.user.publicAddress);
-    res.send({abi: encodedABI, nonce: nonce})
+    res.send({abi: encodedABI, nonce: nonce, approve:true})
 }
 
 exports.cancelSaleFromContract = async (req, res, next) => {
