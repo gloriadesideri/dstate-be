@@ -159,15 +159,6 @@ exports.approveBuilding = async (req, res) => {
 
 }
 
-<<<<<<< HEAD
-exports.fetchBuildings = async (req,res)=>{
-    let buildings=[];
-    if(req.query.building_id){
-        let building = await Building.findOne({id:req.params.building_id}).populate("token_id");
-        buildings.push(building)
-    }else{
-        buildings = await Building.find({user_id:req.user._id}).populate("token_id");
-=======
 exports.fetchBuildings = async (req, res) => {
     let buildings = [];
     if (req.query.building_id) {
@@ -175,7 +166,6 @@ exports.fetchBuildings = async (req, res) => {
         buildings.push(building)
     } else {
         buildings = await Building.find().populate("token_id", "-__v").select("-__v");
->>>>>>> bef2a6db9b00a35bb3b5e3142657d34cf0781b48
     }
     console.log(buildings)
     res.send(200, {buildings})
