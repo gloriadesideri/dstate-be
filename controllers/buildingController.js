@@ -167,6 +167,7 @@ exports.fetchBuildings = async (req, res) => {
     } else {
         buildings = await Building.find().populate("token_id", "-__v").select("-__v");
     }
+    console.log(buildings)
     res.send(200, {buildings})
 }
 exports.approveToken = async (req, res) => {

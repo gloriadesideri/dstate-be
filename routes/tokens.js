@@ -9,7 +9,7 @@ const middlewares = require("../handlers/middlewares")
 router.get("/balanceOf",passport.authenticate("jwt",{session: false}), tokenController.balanceOfTokens );
 //create a proposal to vote for
 router.post("/createProposal",passport.authenticate("jwt",{session: false}),tokenController.createProposal);
-router.get("/checkForProposals",passport.authenticate("jwt",{session: false}),tokenController.getProposals);
+router.post("/checkForProposals",passport.authenticate("jwt",{session: false}),tokenController.getProposals);
 router.post("/submitVote",passport.authenticate("jwt",{session: false}),tokenController.submitVote)
 router.get('/balanceInEth',passport.authenticate('jwt',{session:false}),userController.balanceInETH)
 

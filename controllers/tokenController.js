@@ -39,20 +39,26 @@ exports.getProposals = async (req,res,next)=>{
     var TokenData = JSON.parse(fs.readFileSync(pathToTokenFile));
     var tokenContract = new web3.eth.Contract(TokenData.abi, req.body.tokenAddress);
     let proposals=[]
-    if(req.body.proposalId){
-        let proposal = await tokenContract.methods.proposals(req.body.proposalId).call({from: req.user.publicAddress})
-        proposals.push(proposal)
-    }else if (req.body.proposalNumber && req.body.previousId){
+    if (req.body.proposalNumber!=null && req.body.previousId!=null){
         for( let i =0; i<req.body.proposalNumber; i++){
             let proposal = await tokenContract.methods.proposals(req.body.previousId +i).call({from: req.user.publicAddress})
-            if(!(proposal.title)){
+            console.log(proposal)
+            if((proposal.title!='')){
                 proposals.push(proposal)
             }
         }
+        res.send({proposals:proposals})
+        return
+    }else if (req.body.proposalNumber!=null){
+        let proposal = await tokenContract.methods.proposals(req.body.proposalId).call({from: req.user.publicAddress})
+        proposals.push(proposal)
+        res.send({proposals:proposals})
+        return
     }else{
         res.send(400)
+        return
     }
-    res.send({proposals:proposals})
+    
 }
 exports.submitVote= async (req,res,next)=>{
     const balanceInEth= await getBalance(req.user.publicAddress, req.body.tokenAddress);

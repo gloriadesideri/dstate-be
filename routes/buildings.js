@@ -12,7 +12,7 @@ router.post("/createToken",passport.authenticate("jwt",{session: false}),middlew
 router.get("/unapproved", passport.authenticate("jwt",{session: false}), middlewares.checkAdminRole, buildingController.fetchUnapproved)
 router.post("/approve", passport.authenticate("jwt",{session: false}), middlewares.checkAdminRole, buildingController.approveBuilding)
 router.get("/", passport.authenticate("jwt",{session: false}), middlewares.checkAdminRole, buildingController.fetchBuildings)
-router.post("/approved", buildingController.fetchApproved)
+router.post("/approved",passport.authenticate("jwt",{session: false}), buildingController.fetchApproved)
 
 router.post("/createSetPriceTransaction", passport.authenticate("jwt",{session: false}), middlewares.checkForBuildingApproval, buildingController.createSetPriceTransaction)
 router.post("/getPriceForTokens", passport.authenticate("jwt",{session: false}), middlewares.checkForBuildingApproval, buildingController.getPriceForTokens)
