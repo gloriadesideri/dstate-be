@@ -21,7 +21,7 @@ const buildingSchema = new mongoose.Schema({
         ref:'User'
     },
     token_id: {
-        type: mongoose.Schema.Types.ObjectId,
+        type:mongoose.Schema.Types.ObjectId,
         ref:'Token'
     },
     approved:{

@@ -28,7 +28,7 @@ exports.get = async (req, res, next) => {
     // AccessToken payload is in req.user.payload, especially its `id` field
     // UserId is the param in /users/:userId
     // We only allow user accessing herself, i.e. require payload.id==userId
-    if (req.user._id !== req.params.userId) {
+    if (req.user._id != req.params.userId) {
         return res
             .status(401)
             .send({ error: 'You can can only access yourself' });
@@ -41,7 +41,8 @@ exports.profile =async (req, res, next) => {
     // AccessToken payload is in req.user.payload, especially its `id` field
     // UserId is the param in /users/:userId
     // We only allow user accessing herself, i.e. require payload.id==userId
-    if (req.user._id !== req.params.userId) {
+   
+    if (req.user._id != req.params.userId) {
         return res
             .status(401)
             .send({ error: 'You can can only access yourself' });

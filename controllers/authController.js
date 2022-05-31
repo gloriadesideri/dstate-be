@@ -78,9 +78,9 @@ exports.login = async (req, res, next) => {
                     },
                     "E1J6vwm0KkRvOkbeMlex-5hN36OwP_UTv5dZZVpyoN8",
                 )
-                return accessToken;
+                return {accessToken, user_id:user.id};
             })
-            .then((accessToken) => res.json({accessToken}))
+            .then(({accessToken,user_id}) => res.json({accessToken,user_id}))
             .catch(next)
     );
 
