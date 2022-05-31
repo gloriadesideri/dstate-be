@@ -35,7 +35,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: "user"
     },
-    token_ids:[{type:mongoose.Schema.ObjectId,
+    token_ids:[{type:mongoose.Schema.Types.ObjectId,
         ref:'Token'}]
 
 

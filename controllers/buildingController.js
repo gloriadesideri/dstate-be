@@ -125,11 +125,12 @@ exports.approveBuilding = async (req, res)=>{
 exports.fetchBuildings = async (req,res)=>{
     let buildings=[];
     if(req.query.building_id){
-        let building = await Building.findOne({id:req.params.building_id}).populate("token_id", "-__v").select("-__v");
+        let building = await Building.findOne({id:req.params.building_id}).populate("token_id");
         buildings.push(building)
     }else{
-        buildings = await Building.find({user_id:req.user._id}).populate("token_id", "-__v").select("-__v");
+        buildings = await Building.find({user_id:req.user._id}).populate("token_id");
     }
+    console.log(buildings)
     res.send(200, {buildings})
 }
 exports.approveToken = async (req,res)=>{
