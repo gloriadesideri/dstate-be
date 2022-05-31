@@ -3,6 +3,7 @@ const Web3 = require('web3')
 const path = require("path");
 const fs = require("fs");
 const User = require("../models/User");
+const Token = require('../models/Token');
 const walletAPIUrl = 'https://rinkeby.infura.io/v3/2af9187666bc4f2485d90c76f9727138';
 
 const web3 = new Web3(walletAPIUrl);
@@ -55,7 +56,8 @@ exports.checkBalance = async (req,res,next) =>{
     for(let i=0; i<req.user.token_ids.length; i++){
         const pathToTokenFile=path.join(__dirname,'../solidity/build/contracts','NewToken.json')
         var TokenData = JSON.parse(fs.readFileSync(pathToTokenFile));
-        var tokenContract = new web3.eth.Contract(TokenData.abi, req.user.token_ids[i]);
+        const token = await Token.findOne({_id:req.user.token_ids[i]})
+        var tokenContract = new web3.eth.Contract(TokenData.abi, token.address);
         const balanceInGwei= await tokenContract.methods.balanceOf(req.user.publicAddress).call({from:req.user.publicAddress})
         if (balanceInGwei==0){
             await  User.findOneAndUpdate(
