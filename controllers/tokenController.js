@@ -51,6 +51,10 @@ exports.getProposals = async (req,res,next)=>{
         return
     }else if (req.body.proposalNumber!=null){
         let proposal = await tokenContract.methods.proposals(req.body.proposalId).call({from: req.user.publicAddress})
+        let votesN = await tokenContract.methods.votes(req.body.proposalId).call({from: req.user.publicAddress})
+        let votingResult = await tokenContract.methods.votingResult(req.body.proposalId).call({from: req.user.publicAddress})
+        proposal.votesN= votesN
+        proposal.votingResult= votingResult
         proposals.push(proposal)
         res.send({proposals:proposals})
         return
@@ -58,7 +62,7 @@ exports.getProposals = async (req,res,next)=>{
         res.send(400)
         return
     }
-    
+
 }
 exports.submitVote= async (req,res,next)=>{
     const balanceInEth= await getBalance(req.user.publicAddress, req.body.tokenAddress);
