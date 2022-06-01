@@ -77,34 +77,37 @@ exports.createToken = async (req, res, next) => {
         tx = await web3.eth.getTransaction(req.body.transactionHash)
     }
     let receipt = await web3.eth.getTransactionReceipt(req.body.transactionHash)
-    const pathToTokenFile = path.join(__dirname, '../solidity/build/contracts', 'NewToken.json')
-    var TokenData = JSON.parse(fs.readFileSync(pathToTokenFile));
-    var myContract = new web3.eth.Contract(TokenData.abi, receipt.contractAddress);
-    var rentAddress = await myContract.methods.rent().call({from: req.user.publicAddress})
+    if(receipt.status==false){
+        res.send(500, "Transaction failed")
+    }else{
+        const pathToTokenFile = path.join(__dirname, '../solidity/build/contracts', 'NewToken.json')
+        var TokenData = JSON.parse(fs.readFileSync(pathToTokenFile));
+        var myContract = new web3.eth.Contract(TokenData.abi, receipt.contractAddress);
+        var rentAddress = await myContract.methods.rent().call({from: req.user.publicAddress})
 
-    try {
-        let token = await Token.create({
-            name: req.body.name,
-            symbol: req.body.symbol,
-            initial_amount: req.body.initial_amount,
-            address: receipt.contractAddress,
-            user_id: req.user._id
-        });
-        let building = await Building.findOneAndUpdate(
-            {"_id": req.body.building_id},
-            {"token_id": token._id, "rentContractAddress": rentAddress},
-        )
-        let user = await User.findOneAndUpdate(
-            {"_id": req.user._id},
-            {$push: {"token_ids": token._id}}
-        )
-        return res.send({building: building, token: token})
+        try {
+            let token = await Token.create({
+                name: req.body.name,
+                symbol: req.body.symbol,
+                initial_amount: req.body.initial_amount,
+                address: receipt.contractAddress,
+                user_id: req.user._id
+            });
+            let building = await Building.findOneAndUpdate(
+                {"_id": req.body.building_id},
+                {"token_id": token._id, "rentContractAddress": rentAddress},
+            )
+            let user = await User.findOneAndUpdate(
+                {"_id": req.user._id},
+                {$push: {"token_ids": token._id}}
+            )
+            return res.send({building: building, token: token})
 
-    } catch (error) {
-        console.log(error)
-        res.send(500, error)
+        } catch (error) {
+            console.log(error)
+            res.send(500, error)
+        }
     }
-
 
 }
 exports.create = async (req, res) => {
