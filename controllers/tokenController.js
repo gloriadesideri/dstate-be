@@ -42,19 +42,19 @@ exports.getProposals = async (req,res,next)=>{
     if (req.body.proposalNumber!=null && req.body.previousId!=null){
         for( let i =0; i<req.body.proposalNumber; i++){
             let proposal = await tokenContract.methods.proposals(req.body.previousId +i).call({from: req.user.publicAddress})
-            console.log(proposal)
             if((proposal.title!='')){
                 proposals.push(proposal)
             }
         }
         res.send({proposals:proposals})
         return
-    }else if (req.body.proposalNumber!=null){
+    }else if (req.body.proposalId!=null){
         let proposal = await tokenContract.methods.proposals(req.body.proposalId).call({from: req.user.publicAddress})
         let votesN = await tokenContract.methods.votes(req.body.proposalId).call({from: req.user.publicAddress})
         let votingResult = await tokenContract.methods.votingResult(req.body.proposalId).call({from: req.user.publicAddress})
         proposal.votesN= votesN
         proposal.votingResult= votingResult
+        console.log(proposal)
         proposals.push(proposal)
         res.send({proposals:proposals})
         return
