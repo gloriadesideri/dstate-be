@@ -70,7 +70,7 @@ contract BuySell is Ownable {
         //fix for when there is cheapest array with 0 for sale
 
         for (uint j = 0; j < sortedArray.length; j++) {
-            if (sortedArray[j].tokenAddress == tokenAddress && sortedArray[j].amountOfETH> previousCheapest.amountOfETH) {
+            if (sortedArray[j].tokenAddress == tokenAddress && sortedArray[j].amountOfETH >= previousCheapest.amountOfETH && int(j) > indexOf(sortedArray, previousCheapest.id)) {
                 return int(j); //changed from returning j
             }
         }
@@ -91,7 +91,7 @@ contract BuySell is Ownable {
         //fix for when there is cheapest array with 0 for sale
 
         for (uint j = 0; j < sortedArray.length; j++) {
-            if (sortedArray[j].tokenAddress == tokenAddress && sortedArray[j].amountOfETH> previousCheapest.amountOfETH && sortedArray[j].seller == sellerAddress) {
+            if (sortedArray[j].tokenAddress == tokenAddress && sortedArray[j].amountOfETH>= previousCheapest.amountOfETH && sortedArray[j].seller == sellerAddress && int(j) > indexOf(sortedArray, previousCheapest.id)) {
                 return int(j); //changed from returning j
             }
         }
@@ -151,6 +151,15 @@ contract BuySell is Ownable {
     function find(uint id) private view returns(int realIndex){
         for (int i =0; i<int(sellingInstances.length); i++){
             if(sellingInstances[uint(i)].id==id){
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    function indexOf(sellingInstance[] memory array, uint id) private pure returns(int index){
+        for (int i =0; i<int(array.length); i++){
+            if(array[uint(i)].id==id){
                 return i;
             }
         }
