@@ -54,7 +54,7 @@ exports.getProposals = async (req,res,next)=>{
         let votingResult = await tokenContract.methods.votingResult(req.body.proposalId).call({from: req.user.publicAddress})
         proposal.votesN= votesN
         proposal.votingResult= votingResult
-        console.log(proposal)
+
         proposals.push(proposal)
         res.send({proposals:proposals})
         return
