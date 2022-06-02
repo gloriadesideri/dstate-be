@@ -24,7 +24,7 @@ app.use(passport.initialize());
 app.use(passport.session())
 //app.use(expressValidator());
 
-const uri = `mongodb+srv://${process.env.MONGO_DB_USER}:${process.env.MONGO_DB_PS}@cluster0.cbsn2.mongodb.net/dstate?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://${process.env.MONGO_DB_USER}:${process.env.MONGO_DB_PS}@cluster0.cbsn2.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
 // Mongoose
 const conn = mongoose.createConnection(uri);
 

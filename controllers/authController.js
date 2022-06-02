@@ -2,6 +2,7 @@ const User = require('../models/User');
 const ethSigUtil = require('eth-sig-util');
 const ethJsUtil = require('ethereumjs-util');
 const jwt = require('jsonwebtoken');
+require('dotenv').config()
 
 
 
@@ -43,7 +44,6 @@ exports.login = async (req, res, next) => {
                     data: msgBufferHex,
                     sig: signature,
                 });
-                console.log(address)
 
 
                 // The signature verification is successful if the address found with
@@ -52,7 +52,7 @@ exports.login = async (req, res, next) => {
                     return user;
                 } else {
                     res.status(401).send({
-                        
+
                         error: 'Signature verification failed',
                     });
 
@@ -76,7 +76,7 @@ exports.login = async (req, res, next) => {
                     {
                         id: user.id, publicAddress,
                     },
-                    "E1J6vwm0KkRvOkbeMlex-5hN36OwP_UTv5dZZVpyoN8",
+                    process.env.PASSPORT_SECRET,
                 )
                 return {accessToken, user_id:user.id};
             })

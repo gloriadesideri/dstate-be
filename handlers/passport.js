@@ -5,11 +5,12 @@ const ExtractJWT=require('passport-jwt').ExtractJwt
 const path=require('path')
 const fs=require('fs')
 const {ObjectID} = require("mongodb");
+require('dotenv').config()
 
 
 const options={
     jwtFromRequest:ExtractJWT.fromAuthHeaderAsBearerToken(),
-    secretOrKey:"E1J6vwm0KkRvOkbeMlex-5hN36OwP_UTv5dZZVpyoN8",
+    secretOrKey:process.env.PASSPORT_SECRET,
 }
 const strategy=new JWTStrategy(options, async (payload,done)=>{
     await User.findOne({_id:payload.id}).then((user)=>{
